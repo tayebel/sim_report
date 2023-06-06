@@ -1,4 +1,5 @@
-
+#open RESInsinght (tested in version 03/2023).
+#import the reservoir simulation case (both summary file and EGRID file) you would like to export the data from in RESInsinght. 
 from sim_report import SimReport
 sim=SimReport(unit="METRIC")
 #you can add where you would like to save the Excel report
