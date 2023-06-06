@@ -1,33 +1,45 @@
 
-
-class SimReport: 
-    def __init__(self):
-        #hi
+class SimReport:
+    def __init__(self,unit):
         import openpyxl
+       
         self.workbook = openpyxl.Workbook()
+        self.unit=unit
         self.sheet = self.workbook.active
         self.head_sheet = self.workbook.create_sheet(title="Header")
         self.inj_sheet = self.workbook.create_sheet(title="INJ_WELLS")
         self.P_sheet=self.workbook.create_sheet(title="Pressure")
+        self.inplace_sheet=self.workbook.create_sheet(title="Initial in-place")
         self.head_column_names = ["Rlat","Rlong","i","j","x","y","API","WellName","FluidType","WellStatus","BHLatitude","BHLongitude","CurrentOperator","OriginalOperator","SpudDate","CompletionDate","MeasuredDepth","TrueVerticalDepth"]
         self.sheet.title = "PROD_WELLS"
-        self.sheet_column_names = ["API", "WellName", "ReportDate", "Days", "WellOil (STB)", "WellGas (MSCF)", "WellWater (STB)"]
-        self.inj_column_names = ["API", "WellName", "ReportDate", "Days",  "MonthlyWater (bbl)","MonthlyGas (mcf)"]
-        self.P_column_names = ["Date","Pressure(Psi)"]  
-          
+
+        if self.unit=="FIELD": 
+                self.sheet_column_names = ["API", "WellName", "ReportDate", "Days", "WellOil (STB)", "WellGas (MSCF)", "WellWater (STB)"]
+                self.inj_column_names = ["API", "WellName", "ReportDate", "Days",  "MonthlyWater (bbl)","MonthlyGas (mcf)"]
+                self.P_column_names = ["Date","Pressure(Psi)"]  
+                self.inplace_column_names = ["OIL (STB)","FREE GAS (Mscf)","WATER (STB)","PORE-VOLUME(RB)"]  
+        elif self.unit=="METRIC": 
+                self.sheet_column_names = ["API", "WellName", "ReportDate", "Days", "WellOil (SM3)", "WellGas (SM3)", "WellWater (SM3)"]
+                self.inj_column_names = ["API", "WellName", "ReportDate", "Days",  "MonthlyWater (SM3)","MonthlyGas (SM3)"]
+                self.P_column_names = ["Date","Pressure(BARSA)"]  
+                self.inplace_column_names = ["OIL (STB)","FREE GAS (SM3)","WATER (SM3)","PORE-VOLUME(RM3)"]  
+        else:
+            raise ValueError("Invalid unit. Please enter a valid unit, METRIC or FIELD.")
+                
     def input_colum(self,column_names,sheet_name):
             for col_num, column_name in enumerate(column_names, start=1):
                 sheet_name.cell(row=1, column=col_num).value = column_name
             sheet_name.sheet_format.defaultColWidth  = 15
             
-    def sheet_report(self,case_num,Rlat,Rlong,DX,DY,saving_path=None,MeasuredDepth=None,TrueVerticalDepth=None):
-        import rips 
-        import time 
+    def sheet_report(self,case_num,Rlat,Rlong,saving_path=None,MeasuredDepth=None,TrueVerticalDepth=None):
+        import rips
         import numpy as np
+        import time
         self.input_colum( self.sheet_column_names,self.sheet)
         self.input_colum( self.head_column_names,self.head_sheet)
         self.input_colum( self.inj_column_names,self.inj_sheet)
         self.input_colum( self.P_column_names,self.P_sheet)
+        self.input_colum( self.inplace_column_names,self.inplace_sheet)
         num =2    
         num1=2
         num2=2
@@ -45,9 +57,27 @@ class SimReport:
 
                 if summary_case is None:
                     print("No summary case found")
-                   
+                    exit()
                 else:
-
+                    cases = resinsight.project.cases()
+                    OOIP=np.array(summary_case.resample_values("FOIP").values)
+                    if len(OOIP)>0: 
+                        self.inplace_sheet.cell(row=2, column=1).value =OOIP[0]
+                    OGIP=np.array(summary_case.resample_values("FGIP").values)
+                    if len(OGIP)>0:
+                        self.inplace_sheet.cell(row=2, column=2).value =OGIP[0]
+                        
+                        
+                    OWIP=np.array(summary_case.resample_values("FWIP").values)
+                    if len(OWIP)>0:
+                        self.inplace_sheet.cell(row=2, column=3).value =OWIP[0]
+                    
+                    porv_results = cases[case_num-1].active_cell_property("STATIC_NATIVE", "PORV", 0)
+                    pov=0
+                    for i in range(len(porv_results)):
+                            pov=porv_results[i]+pov
+                    
+                    self.inplace_sheet.cell(row=2, column=4).value =pov
                     FRP=np.array(summary_case.resample_values("FPR").values)
                     for p, P in enumerate(FRP, start=2):
                             r5 = p  
@@ -58,7 +88,7 @@ class SimReport:
                             num10+=1
 
             
-                    cases = resinsight.project.cases()
+                   
 
                     sim_wells = cases[case_num-1].simulation_wells() 
                     steps = summary_case.summary_vector_values('TIME').values
@@ -75,8 +105,16 @@ class SimReport:
                         r8=v
                         self.head_sheet.cell(row=r8, column=7).value = sim_well.name
                         self.head_sheet.cell(row=r8, column=8).value = sim_well.name
-                        i=sim_well.cells(n)[case_num-1].ijk.i+1
-                        j=sim_well.cells(n)[case_num-1].ijk.j+1
+                        cell=sim_well.cells(n)[case_num-1]
+                        i=cell.ijk.i + 1
+                        j=cell.ijk.j + 1
+                        grid = cases[case_num-1].grids()[cell.grid_index]
+                        dimensions = grid.dimensions()
+                        cell_index = (dimensions.i * dimensions.j * cell.ijk.k+ dimensions.i * cell.ijk.j+ cell.ijk.i)
+                        cell_centers = grid.cell_centers()
+                        cell_center = cell_centers[cell_index]
+                    
+
                         self.head_sheet.cell(row=r8, column=3).value=i
                         self.head_sheet.cell(row=r8, column=4).value=j
 
@@ -89,14 +127,23 @@ class SimReport:
 
                         self.head_sheet.cell(row=2, column=1).value =Rlat
                         self.head_sheet.cell(row=2, column=2).value =Rlong
-                        self.head_sheet.cell(row=3, column=1).value ="DX"
-                        self.head_sheet.cell(row=3, column=2).value ="DY"
-                        self.head_sheet.cell(row=4, column=1).value =DX
-                        self.head_sheet.cell(row=4, column=2).value =DY
-                        self.head_sheet.cell(row=r8, column=5).value =DX*i
-                        self.head_sheet.cell(row=r8, column=6).value =DY*j
-                        self.head_sheet.cell(row=r8, column=11).value =(Rlat*364543.98+DY*j)*1/364543.98
-                        self.head_sheet.cell(row=r8, column=12).value =(Rlong*np.cos(Rlat)*364543.98+DX*i)*(1/(np.cos(Rlat)*364543.98))
+                     
+                        dx=cell_center.x
+                        dy=cell_center.y
+                    
+
+                        self.head_sheet.cell(row=r8, column=5).value =dx
+                        self.head_sheet.cell(row=r8, column=6).value =dy
+                        
+                        if self.unit=="FIELD":
+                            
+                            self.head_sheet.cell(row=r8, column=11).value =(Rlat*364543.98+dy)*1/364543.98
+                            self.head_sheet.cell(row=r8, column=12).value =(Rlong*np.cos(Rlat)*364543.98+dx)*(1/(np.cos(Rlat)*364543.98))
+                            
+                        elif self.unit=="METRIC":
+                            self.head_sheet.cell(row=r8, column=11).value =(Rlat*364543.98+dy*3.28084)*1/364543.98
+                            self.head_sheet.cell(row=r8, column=12).value =(Rlong*np.cos(Rlat)*364543.98+dx*3.28084)*(1/(np.cos(Rlat)*364543.98))
+                            
                         self.head_sheet.cell(row=r8, column=13).value="eW"
                         self.head_sheet.cell(row=r8, column=14).value="eW"
                         c=0
@@ -165,6 +212,7 @@ class SimReport:
                                                 self.head_sheet.cell(row=r8, column=15).value=time.strftime("%d %b %Y", time.gmtime(t2[0]))
                                                 self.head_sheet.cell(row=r8, column=16).value=time.strftime("%d %b %Y", time.gmtime(t2[0]))
                                                 self.head_sheet.cell(row=r8, column=9).value="WATER and GAS"
+                                                self.head_sheet.cell(row=r8, column=10).value="OPEN"
 
                     num7 = num7 + len(sim_wells)
 
@@ -364,4 +412,3 @@ class SimReport:
             
      
                   
-                            
