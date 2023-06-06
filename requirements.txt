@@ -2,7 +2,7 @@
 # python version=>3.10 
 #install the following libraries:
 pip install openpyxl
-pip instalrips
+pip install rips
 pip install numpy
 pip install time
 #open RESInsinght (tested in version 03/2023).
