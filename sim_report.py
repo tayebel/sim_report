@@ -1,9 +1,8 @@
 
 
 class SimReport: 
-    
-    
     def __init__(self):
+        #hi
         import openpyxl
         self.workbook = openpyxl.Workbook()
         self.sheet = self.workbook.active
