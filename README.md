@@ -17,13 +17,13 @@ To use the Reservoir Simulation Report Tool, follow these steps:
 2. Clone this repository to your local machine:
    ```bash
       git clone https://github.com/tayebel/sim_report.git
-    ```bash
+     ```
 4. Install the required dependencies by running the following command:
 
 ```bash
 cd sim_report
 pip install -r requirements.txt
-```bash
+ ```
 ## Usage
 Check the eaxample in the project to understand how to use it.
 
