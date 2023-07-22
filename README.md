@@ -25,7 +25,7 @@ cd sim_report
 pip install -r requirements.txt
  ```
 ## Usage
-Check the eaxample in the project to understand how to use it.
+Check the example in the project to understand how to use it.
 
 
 
