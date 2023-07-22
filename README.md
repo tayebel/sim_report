@@ -27,8 +27,5 @@ pip install -r requirements.txt
 ## Usage
 Check the eaxample in the project to understand how to use it.
 
-## Contributing
-ontributions to the Reservoir Simulation Report Tool are welcome!
-If you have any suggestions, improvements, or would like to contribute code, please feel free
-to contact me.
+
 
