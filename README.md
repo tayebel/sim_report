@@ -26,7 +26,11 @@ cd sim_report
 pip install -r requirements.txt
  ```
 ## Usage
-Check the example in the project to understand how to use it.
+Run the Python script:
+```bash
+ python run.py
+ ```
+
 
 
 
