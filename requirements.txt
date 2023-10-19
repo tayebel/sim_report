@@ -1,16 +1,9 @@
-<<<<<<< HEAD
+
 #requerement
 # python version=>3.10 
 #install the following libraries:
 openpyxl==3.0.10
 rips==2023.6.0.2
 numpy==1.19.4
-=======
-
-openpyxl
-rips
-numpy
->>>>>>> b141110cc27c2df9e9d60c0a57a747e4b7c2ea47
 time
-#open RESInsinght (tested in version 03/2023).
 
