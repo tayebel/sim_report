@@ -3,8 +3,6 @@
 #install the following libraries:
 
 pyodbc
-openpyxl==3.0.10
-rips==2023.6.0.2
-numpy==1.19.4
+openpyxl
+numpy
 time
-
