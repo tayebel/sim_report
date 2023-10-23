@@ -1,9 +1,10 @@
 # Reservoir Simulation Report Tool
 
-The Reservoir Simulation Report Tool is a Python-based tool that automates the generation of reservoir simulation Excel reports using the Resinsight software. It provides a convenient and efficient solution for reservoir engineers to create comprehensive reports for their simulation results.
+The Reservoir Simulation Report Tool is a Python-based tool that automates the generation of reservoir simulation  reports using the Resinsight software. It provides a convenient and efficient solution for reservoir engineers to create comprehensive reports for their simulation results.
 
 ## Features
 
+- Effortlessly create and manage SQL tables within your MS SQL Server database, providing a structured foundation for your reports.
 - Generates reservoir simulation Excel reports with customizable templates.
 - Extracts relevant data from Resinsight, including well information, fluid characteristics, production and injection rates,
    hydrocarbons originally in place, and pressure.
@@ -25,7 +26,11 @@ cd sim_report
 pip install -r requirements.txt
  ```
 ## Usage
-Check the example in the project to understand how to use it.
+Run the Python script:
+```bash
+ python run.py
+ ```
+
 
 
 
